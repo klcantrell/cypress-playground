@@ -1,0 +1,15 @@
+{
+    "extends": "../tsconfig.base",
+    "compilerOptions": {
+        "types": [
+            "cypress",
+            "@testing-library/cypress"
+        ],
+        "isolatedModules": false
+    },
+    "include": [
+        "integration",
+        "support",
+        "plugins"
+    ]
+}
