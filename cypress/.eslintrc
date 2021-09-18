@@ -1,11 +1,9 @@
 {
-    "rules": {
-        "jest/valid-expect": "off",
-        "jest/expect-expect": "off",
-        "@typescript-eslint/no-namespace": "off",
-        "@typescript-eslint/no-unused-expressions": "off"
-    },
-    "parserOptions": {
-        "project": "cypress/tsconfig.json"
-    }
+  "rules": {
+    "@typescript-eslint/no-namespace": "off",
+    "@typescript-eslint/no-unused-expressions": "off"
+  },
+  "parserOptions": {
+    "project": "cypress/tsconfig.json"
+  }
 }
