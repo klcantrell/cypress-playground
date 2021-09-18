@@ -19,7 +19,7 @@ describe('Characters', () => {
       .findByRole('list')
       .findAllByRole('listitem')
       .each((characterItem, index) => {
-        cy.wrap(characterItem).should('have.text', expectedNames[index]);
+        cy.wrap(characterItem).should('include.text', expectedNames[index]);
       });
   });
 
@@ -35,7 +35,7 @@ describe('Characters', () => {
     );
   });
 
-  it.only("clicking a character shows the character's movies page", () => {
+  it("clicking a character shows the character's movies page", () => {
     const expectedCharacter = swapiPeople.results[0];
     const expectedMovies = swapiMovies.results
       .filter((m) => expectedCharacter.films.includes(m.url))
@@ -67,7 +67,7 @@ describe('Characters', () => {
       .findByRole('list')
       .findAllByRole('listitem')
       .each((movieItem, index) => {
-        cy.wrap(movieItem).invoke('text').should('match', new RegExp(expectedMovies[index].title));
+        cy.wrap(movieItem).should('include.text', expectedMovies[index].title);
       });
   });
 });
