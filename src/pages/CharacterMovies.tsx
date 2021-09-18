@@ -1,27 +1,31 @@
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { useCharacters } from '../context/characters';
+import type { MoviesResponse } from '../types';
 
-interface Character {
+interface RouteParams {
   name: string;
 }
 
-interface PeopleResponse {
-  results: Character[];
-}
+export default function CharacterMovies(): React.ReactElement {
+  const { name } = useParams<RouteParams>();
+  const { get: getCharacters } = useCharacters();
+  const currentCharacter =
+    getCharacters()?.find((c) => c.name === decodeURIComponent(name)) ?? null;
 
-function Characters(): React.ReactElement {
-  const [data, setData] = useState<PeopleResponse | null>(null);
+  const [data, setData] = useState<MoviesResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
 
   useEffect(() => {
     if (data === null && !isLoading && !isError) {
       setIsLoading(true);
-      fetch('https://swapi.dev/api/people?page=1')
+      fetch('https://swapi.dev/api/films')
         .then((res) => {
           if (res.ok) {
             return res.json();
           } else {
-            throw new Error('Star Wars people request failed');
+            throw new Error('Star Wars films request failed');
           }
         })
         .then((swapiData) => {
@@ -45,23 +49,23 @@ function Characters(): React.ReactElement {
       </div>
     );
   } else if (isLoading || data === null) {
-    content = <div role='status'>Loading characters...</div>;
+    content = <div role='status'>Loading character's movies...</div>;
   } else {
     content = (
       <ul>
-        {data.results.map((character) => (
-          <li>{character.name}</li>
-        ))}
+        {data.results
+          .filter((m) => currentCharacter?.films.includes(m.url))
+          .map((movie) => (
+            <li key={movie.title}>{movie.title}</li>
+          ))}
       </ul>
     );
   }
 
   return (
-    <section aria-labelledby='characters-heading'>
-      <h2 id='characters-heading'>Characters</h2>
+    <section aria-labelledby='character-movies-heading'>
+      <h2 id='character-movies-heading'>{decodeURIComponent(name)} Movies</h2>
       {content}
     </section>
   );
 }
-
-export default Characters;
