@@ -12,17 +12,17 @@
 
 <script lang="ts">
   import { movies } from '../../../stores/movies';
-  import { characters } from '../../../stores/characters';
-  export let characterName: string;
-
-  const character = $characters?.find((c) => c.name === characterName);
-
+  import { characters, fetchCharacters } from '../../../stores/characters';
   import { onMount } from 'svelte';
   import type { Movie, MoviesResponse } from '../../../types';
+
+  export let characterName: string;
 
   let movieData: Movie[] | undefined;
   let isError = false;
   let isLoading = false;
+
+  $: character = $characters?.find((c) => c.name === characterName);
   $: characterMovies = movieData?.filter((m) => character?.films.includes(m.url));
 
   onMount(async () => {
@@ -39,15 +39,18 @@
       }
     } else {
       movieData = $movies;
+    } 
+    if (character === undefined) {
+      fetchCharacters();
     }
   });
 </script>
 
 <section aria-labelledby="character-movies-heading">
-  <h2 id="character-movies-heading">{character?.name} Movies</h2>
+  <h2 id="character-movies-heading">{characterName} Movies</h2>
   {#if isError}
     <div role="alert">
-      There was a problem loading {character?.name}'s movies, please try refreshing the page
+      There was a problem loading {characterName}'s movies, please try refreshing the page
     </div>
   {:else if isLoading || characterMovies === undefined}
     <div role="status">Loading character's movies...</div>

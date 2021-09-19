@@ -1,9 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { characters } from '../stores/characters';
-  import type { PeopleResponse, Character } from '../types';
+  import { characters, fetchCharacters } from '../stores/characters';
 
-  let data: Character[] | undefined;
   let isError = false;
   let isLoading = false;
 
@@ -11,16 +9,12 @@
     if ($characters === undefined) {
       isLoading = true;
       try {
-        const response = await fetch('https://swapi.dev/api/people?page=1');
-        data = ((await response.json()) as PeopleResponse).results;
-        characters.set(data);
+        await fetchCharacters();
         isLoading = false;
       } catch {
         isError = true;
         isLoading = false;
       }
-    } else {
-      data = $characters;
     }
   });
 </script>
@@ -31,11 +25,11 @@
     <div role="alert">
       There was a problem loading Star Wars characters, please try refreshing the page
     </div>
-  {:else if isLoading || data === undefined}
+  {:else if isLoading || $characters === undefined}
     <div role="status">Loading characters...</div>
   {:else}
     <ul>
-      {#each data as character}
+      {#each $characters as character}
         <li>
           <a href={`/characters/${encodeURIComponent(character.name)}/movies`}>
             {character.name}

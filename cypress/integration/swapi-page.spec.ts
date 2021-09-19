@@ -41,8 +41,14 @@ describe('Characters', () => {
       .filter((m) => expectedCharacter.films.includes(m.url))
       .slice()
       .sort((a, b) => Number(a.url) - Number(b.url));
-    cy.intercept('https://swapi.dev/api/people?page=1', swapiPeople).as('swapiPeople');
-    cy.intercept('https://swapi.dev/api/films', swapiMovies).as('swapiMovies');
+    cy.intercept('https://swapi.dev/api/people?page=1', {
+      delay: 100,
+      body: swapiPeople,
+    }).as('swapiPeople');
+    cy.intercept('https://swapi.dev/api/films', {
+      delay: 100,
+      body: swapiMovies,
+    }).as('swapiMovies');
     cy.visit('/');
     cy.wait('@swapiPeople');
     cy.findByRole('region', { name: 'Characters' })
@@ -61,11 +67,15 @@ describe('Characters', () => {
     );
     cy.findByRole('region', { name: `${expectedCharacter.name} Movies` })
       .as('moviesSection')
-      .findByRole('heading', { level: 2, name: `${expectedCharacter.name} Movies` })
+      .findByRole('heading', {
+        level: 2,
+        name: `${expectedCharacter.name} Movies`,
+      })
       .should('be.visible')
       .get('@moviesSection')
       .findByRole('list')
       .findAllByRole('listitem')
+      .should('have.length', expectedMovies.length)
       .each((movieItem, index) => {
         cy.wrap(movieItem).should('include.text', expectedMovies[index].title);
       });
