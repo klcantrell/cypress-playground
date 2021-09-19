@@ -1,26 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCharacters } from '../context/characters';
-import { PeopleResponse } from '../types';
 
 function Characters(): React.ReactElement {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
-  const { get: getCharacters, set: setCharacters } = useCharacters();
+  const { characters, fetchCharacters } = useCharacters();
 
   useEffect(() => {
-    if (getCharacters() === null && !isLoading && !isError) {
+    if (characters === null && !isLoading && !isError) {
       setIsLoading(true);
-      fetch('https://swapi.dev/api/people?page=1')
-        .then((res) => {
-          if (res.ok) {
-            return res.json();
-          } else {
-            throw new Error('Star Wars people request failed');
-          }
-        })
-        .then((swapiData: PeopleResponse) => {
-          setCharacters(swapiData.results);
+      fetchCharacters()
+        .then((_swapiData) => {
           setIsLoading(false);
         })
         .catch((_error) => {
@@ -28,7 +19,7 @@ function Characters(): React.ReactElement {
           setIsLoading(false);
         });
     }
-  }, [getCharacters, setCharacters, isLoading, isError]);
+  }, [characters, fetchCharacters, isLoading, isError]);
 
   let content: React.ReactElement;
 
@@ -39,12 +30,12 @@ function Characters(): React.ReactElement {
         the page
       </div>
     );
-  } else if (isLoading || getCharacters() === null) {
+  } else if (isLoading || characters === null) {
     content = <div role='status'>Loading characters...</div>;
   } else {
     content = (
       <ul>
-        {getCharacters()?.map((character) => (
+        {characters?.map((character) => (
           <li key={character.name}>
             <Link
               to={`/characters/${encodeURIComponent(character.name)}/movies`}>

@@ -9,16 +9,22 @@ interface RouteParams {
 
 export default function CharacterMovies(): React.ReactElement {
   const { name } = useParams<RouteParams>();
-  const { get: getCharacters } = useCharacters();
+  const { characters, fetchCharacters } = useCharacters();
   const currentCharacter =
-    getCharacters()?.find((c) => c.name === decodeURIComponent(name)) ?? null;
+    characters?.find((c) => c.name === decodeURIComponent(name)) ?? null;
 
   const [data, setData] = useState<MoviesResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
 
   useEffect(() => {
-    if (data === null && !isLoading && !isError) {
+    if (currentCharacter === null) {
+      fetchCharacters();
+    }
+  }, [currentCharacter, fetchCharacters]);
+
+  useEffect(() => {
+    if (data === null && !isLoading && !isError && currentCharacter) {
       setIsLoading(true);
       fetch('https://swapi.dev/api/films')
         .then((res) => {
@@ -37,7 +43,7 @@ export default function CharacterMovies(): React.ReactElement {
           setIsLoading(false);
         });
     }
-  }, [data, setData, isLoading, isError]);
+  }, [data, setData, isLoading, isError, currentCharacter, fetchCharacters]);
 
   let content: React.ReactElement;
 

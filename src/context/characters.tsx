@@ -1,28 +1,49 @@
-import React, { useContext, createContext, useState, useMemo } from 'react';
-import { Character } from '../types';
+import React, {
+  useContext,
+  createContext,
+  useState,
+  useMemo,
+  useCallback,
+} from 'react';
+import { Character, PeopleResponse } from '../types';
 
 interface Props {
   children: React.ReactElement;
 }
 
 interface ContextValue {
-  get: () => Character[] | null;
-  set: (characters: Character[]) => void;
+  characters: Character[] | null;
+  setCharacters: (characters: Character[]) => void;
+  fetchCharacters: () => Promise<PeopleResponse>;
 }
 
 const CharactersContext = createContext<ContextValue>({
-  get: () => null,
-  set: (_characters) => {},
+  characters: null,
+  setCharacters: (_characters) => {},
+  fetchCharacters: () => Promise.resolve<PeopleResponse>({ results: [] }),
 });
 
 export function CharactersProvider({ children }: Props): React.ReactElement {
   const [characters, setCharacters] = useState<Character[] | null>(null);
+
+  const fetchCharacters = useCallback(async () => {
+    const res = await fetch('https://swapi.dev/api/people?page=1');
+    if (res.ok) {
+      const swapiData: PeopleResponse = await res.json();
+      setCharacters(swapiData.results);
+      return swapiData;
+    } else {
+      throw new Error('Star Wars people request failed');
+    }
+  }, []);
+
   const contextValue = useMemo(
     () => ({
-      get: () => characters,
-      set: setCharacters,
+      characters,
+      setCharacters,
+      fetchCharacters,
     }),
-    [characters, setCharacters]
+    [characters, setCharacters, fetchCharacters]
   );
 
   return (
