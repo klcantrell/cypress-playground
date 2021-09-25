@@ -1,17 +1,35 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { useCharacters } from '../context/characters';
-import type { MoviesResponse } from '../types';
+import { useRouter } from 'next/router';
+import { useCharacters } from '../../../context/characters';
+import type { MoviesResponse, PeopleResponse } from '../../../types';
+import { GetStaticPaths, GetStaticProps } from 'next';
 
-interface RouteParams {
-  name: string;
-}
+export const getStaticPaths: GetStaticPaths = async () => {
+  const response = await fetch('https://swapi.dev/api/people?page=1');
+  const data: PeopleResponse = await response.json();
+  const paths = data.results.map((c) => ({
+    params: { characterName: c.name },
+  }));
+  return {
+    paths,
+    fallback: false,
+  };
+};
+
+export const getStaticProps: GetStaticProps = async (_context) => {
+  return {
+    props: {},
+  };
+};
 
 export default function CharacterMovies(): React.ReactElement {
-  const { name } = useParams<RouteParams>();
+  const router = useRouter();
+  const { characterName } = router.query;
   const { characters, fetchCharacters } = useCharacters();
   const currentCharacter =
-    characters?.find((c) => c.name === decodeURIComponent(name)) ?? null;
+    characters?.find(
+      (c) => c.name === decodeURIComponent(characterName as string)
+    ) ?? null;
 
   const [data, setData] = useState<MoviesResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -55,7 +73,7 @@ export default function CharacterMovies(): React.ReactElement {
       </div>
     );
   } else if (isLoading || data === null) {
-    content = <div role='status'>Loading character's movies...</div>;
+    content = <div role='status'>Loading character&apos;s movies...</div>;
   } else {
     content = (
       <ul>
@@ -70,7 +88,9 @@ export default function CharacterMovies(): React.ReactElement {
 
   return (
     <section aria-labelledby='character-movies-heading'>
-      <h2 id='character-movies-heading'>{decodeURIComponent(name)} Movies</h2>
+      <h2 id='character-movies-heading'>
+        {decodeURIComponent(characterName as string)} Movies
+      </h2>
       {content}
     </section>
   );

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { useCharacters } from '../context/characters';
 
 function Characters(): React.ReactElement {
@@ -25,7 +25,7 @@ function Characters(): React.ReactElement {
 
   if (isError) {
     content = (
-      <div role='alert'>
+      <div role='alert' aria-label='character load failed alert'>
         There was a problem loading Star Wars characters, please try refreshing
         the page
       </div>
@@ -38,7 +38,7 @@ function Characters(): React.ReactElement {
         {characters?.map((character) => (
           <li key={character.name}>
             <Link
-              to={`/characters/${encodeURIComponent(character.name)}/movies`}>
+              href={`/characters/${encodeURIComponent(character.name)}/movies`}>
               {character.name}
             </Link>
           </li>

@@ -33,7 +33,7 @@ describe('Characters', () => {
     cy.visit('/');
     cy.wait('@swapiPeople');
 
-    cy.findByRole('alert').should(
+    cy.findByRole('alert', { name: /character load failed alert/i }).should(
       'have.text',
       'There was a problem loading Star Wars characters, please try refreshing the page'
     );

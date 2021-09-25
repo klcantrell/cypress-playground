@@ -5,7 +5,7 @@ import React, {
   useMemo,
   useCallback,
 } from 'react';
-import { Character, PeopleResponse } from '../types';
+import type { Character, PeopleResponse } from '../types';
 
 interface Props {
   children: React.ReactElement;
