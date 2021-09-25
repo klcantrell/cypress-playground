@@ -1,56 +1,37 @@
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useEffect } from 'react';
 import { useCharacters } from '../context/characters';
+import type { Character } from '../types';
 
-function Characters(): React.ReactElement {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const { characters, fetchCharacters } = useCharacters();
+interface Props {
+  data: Character[] | null;
+}
+
+function Characters({ data }: Props): React.ReactElement {
+  const { setCharacters } = useCharacters();
 
   useEffect(() => {
-    if (characters === null && !isLoading && !isError) {
-      setIsLoading(true);
-      fetchCharacters()
-        .then((_swapiData) => {
-          setIsLoading(false);
-        })
-        .catch((_error) => {
-          setIsError(true);
-          setIsLoading(false);
-        });
-    }
-  }, [characters, fetchCharacters, isLoading, isError]);
+    setCharacters(data ?? []);
+  }, [setCharacters, data]);
 
-  let content: React.ReactElement;
-
-  if (isError) {
-    content = (
-      <div role='alert' aria-label='character load failed alert'>
-        There was a problem loading Star Wars characters, please try refreshing
-        the page
-      </div>
-    );
-  } else if (isLoading || characters === null) {
-    content = <div role='status'>Loading characters...</div>;
-  } else {
-    content = (
+  return (
+    <section aria-labelledby='characters-heading'>
+      <h2 id='characters-heading'>Characters</h2>
       <ul>
-        {characters?.map((character) => (
+        {data?.map((character) => (
           <li key={character.name}>
             <Link
               href={`/characters/${encodeURIComponent(character.name)}/movies`}>
               {character.name}
             </Link>
           </li>
-        ))}
+        )) ?? (
+          <div>
+            There was a problem loading Star Wars characters, please try again
+            later
+          </div>
+        )}
       </ul>
-    );
-  }
-
-  return (
-    <section aria-labelledby='characters-heading'>
-      <h2 id='characters-heading'>Characters</h2>
-      {content}
     </section>
   );
 }

@@ -1,8 +1,32 @@
+import { GetStaticProps } from 'next';
 import Head from 'next/head';
 import Characters from '../components/Characters';
 import styles from '../styles/Home.module.css';
+import { Character, PeopleResponse } from '../types';
 
-export default function Home(): React.ReactElement {
+interface Props {
+  characters: Character[] | null;
+}
+
+export const getStaticProps: GetStaticProps = async (_context) => {
+  const res = await fetch('https://swapi.dev/api/people?page=1');
+  if (res.ok) {
+    const swapiData: PeopleResponse = await res.json();
+    return {
+      props: {
+        characters: swapiData.results,
+      },
+    };
+  } else {
+    return {
+      props: {
+        characters: null,
+      },
+    };
+  }
+};
+
+export default function Home({ characters }: Props): React.ReactElement {
   return (
     <div className={styles.container}>
       <Head>
@@ -11,7 +35,7 @@ export default function Home(): React.ReactElement {
         <link rel='icon' href='/favicon.ico' />
       </Head>
       <h1>TDD Cypress Demo</h1>
-      <Characters />
+      <Characters data={characters} />
     </div>
   );
 }
